@@ -45,6 +45,7 @@ class TextParsing(tf.keras.Model):
              filter_kinds,
              filters_size,
              filter_nums,
+             classes_nums,
              dropout,
              word_embedding):
         super(TextParsing, self).__init__(name = 'semantic_parsing')
@@ -57,12 +58,26 @@ class TextParsing(tf.keras.Model):
         self.filters_size = filters_size
         self.filter_nums = filter_nums
 
+        self.classes_nums = classes_nums
         self.dropout = dropout
         self.word_embedding = word_embedding
+
+        self.kernel_initializer = "ones"
+        self.bias_initializer = "zeros"
 
     def build(self):
         self.convs = []
         self.pools = []
+
+        self.fc_kernel = self.add_variable(
+            shape=[self.filter_nums * self.filter_kinds, self.classes_nums],
+            name="fc_kernel",
+            initializer=self.kernel_initializer)
+        
+        self.fc_bias = self.add_variable(
+            shape=(self.classes_nums),
+            name="fc_bias",
+            initializer=self.bias_initializer)
 
         for i in range(self.filter_kinds):
             conv2D = tf.keras.layers.Conv2D(
@@ -93,3 +108,10 @@ class TextParsing(tf.keras.Model):
         fc = tf.reshape(fc, [-1, self.filter_nums * self.filter_kinds])
 
         droped = tf.nn.dropout(fc, rate=self.dropout)
+
+        logits = tf.nn.xw_plus_b(droped, self.fc_kernel, self.fc_bias, name="logits")
+
+        projection = tf.nn.softmax(logits)
+
+        return projection
+
