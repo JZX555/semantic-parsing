@@ -115,3 +115,5 @@ class TextParsing(tf.keras.Model):
 
         return projection
 
+if __name__ == "__main__":
+    
