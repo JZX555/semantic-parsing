@@ -7,16 +7,11 @@ import hyper_parameter
 
 class WordEmbedding(tf.keras.layers.Layer):
     def __init__(self, vocab_size, embedding_size, name="embedding"):
-        """Specify characteristic parameters of embedding layer.
+    """
+    Specify characteristic parameters of embedding layer.
     Args:
-      vocab_size: Number of tokens in the embedding. (Typically ~32,000)
-      num_units: Dimensionality of the embedding. (Typically 512 or 1024)
-      method: Strategy for performing embedding lookup. "gather" uses tf.gather
-        which performs well on CPUs and GPUs, but very poorly on TPUs. "matmul"
-        one-hot encodes the indicies and formulates the embedding as a sparse
-        matrix multiplication. The matmul formulation is wasteful as it does
-        extra work, however matrix multiplication is very fast on TPUs which
-        makes "matmul" considerably faster than "gather" on TPUs.
+      vocab_size: Number of tokens in the embedding.
+      embedding_size: the dimension of token.
     """
         super(WordEmbedding, self).__init__(name='word_embedding')
         self.vocab_size = vocab_size
@@ -52,6 +47,15 @@ class TextParsing(tf.keras.Model):
              classes_nums,
              dropout,
              word_embedding):
+    """
+    The model for semantic parsing.
+    Args:
+        ...
+    Input:
+        A batch of tokens with shape [batch_size, token length].
+    Output:
+        The classification results after SoftMax.
+    """
         super(TextParsing, self).__init__(name = 'semantic_parsing')
 
         self.embedding_size = embedding_size

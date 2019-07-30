@@ -7,7 +7,13 @@ class HyperParam:
     def __init__(self,
                  mode,
                  vocab=14000):
-
+    """
+    The HyperParam of the model, you can use 'test', 'small' or 'large' to 
+    specify model size.
+    Args:
+        mode: use 'test', 'small' or 'large' to use different model size.
+        vocab: Number of tokens in the embedding.
+    """
         self.model_summary_dir = cwd + "/model_summary"
         self.model_weights_dir = cwd + "/model_weights"
         self.model_checkpoint_dir = cwd + "/model_checkpoint"
