@@ -7,11 +7,11 @@ import hyper_parameter
 
 class WordEmbedding(tf.keras.layers.Layer):
     def __init__(self, vocab_size, embedding_size, name="embedding"):
-    """
+        """
     Specify characteristic parameters of embedding layer.
     Args:
-      vocab_size: Number of tokens in the embedding.
-      embedding_size: the dimension of token.
+        vocab_size: Number of tokens in the embedding.
+        embedding_size: the dimension of token.
     """
         super(WordEmbedding, self).__init__(name='word_embedding')
         self.vocab_size = vocab_size
@@ -47,7 +47,7 @@ class TextParsing(tf.keras.Model):
              classes_nums,
              dropout,
              word_embedding):
-    """
+        """
     The model for semantic parsing.
     Args:
         ...
