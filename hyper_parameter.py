@@ -7,7 +7,7 @@ class HyperParam:
     def __init__(self,
                  mode,
                  vocab=14000):
-    """
+        """
     The HyperParam of the model, you can use 'test', 'small' or 'large' to 
     specify model size.
     Args:

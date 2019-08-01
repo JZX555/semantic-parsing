@@ -1,1 +1,5 @@
 __pycache__/
+
+model_checkpoint/
+model_summary/
+model_weights/
