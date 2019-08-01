@@ -19,16 +19,16 @@ def clean_str(string):
 
     return string.strip().lower()
 
-def tokenize_and_padding(data, 
+def tokenize_and_padding(text, 
                          tokenizer=None):
     if tokenizer == None:
         tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
 
-    tokenizer.fit_on_texts(data)
-    data = tokenizer.texts_to_sequences(data)
-    data = tf.keras.preprocessing.sequence.pad_sequences(data, padding='post')
+    tokenizer.fit_on_texts(text)
+    text = tokenizer.texts_to_sequences(text)
+    text = tf.keras.preprocessing.sequence.pad_sequences(text, padding='post')
 
-    return data, tokenizer
+    return text, tokenizer
 
 def process_text(data_path):
     pos_data = open(data_path + '.pos', "r", encoding='UTF-8').readlines()
@@ -39,13 +39,23 @@ def process_text(data_path):
     neg_data = [clean_str(text.strip()) for text in neg_data]
     neg_label = [[1, 0] for _ in neg_data]
 
-    data = pos_data + neg_data
-    data, tokenizer = tokenize_and_padding(data)
+    text = pos_data + neg_data
+    text, tokenizer = tokenize_and_padding(text)
     label = np.concatenate([pos_label, neg_label], 0)
 
-    return data, label, tokenizer
+    return text, label, tokenizer
+
+def generator_batch_dataset(data_path, batch_size):
+    text, label, tokenizer = process_text(data_path)
+    print(np.shape(text))
+
+    dataset = (text, label)
+    dataset = tf.data.Dataset.from_tensor_slices(dataset)
+    dataset = dataset.batch(batch_size, drop_remainder = True)
+
+    return dataset, tokenizer
 
 if __name__ == "__main__":
-    data, label, tokenizer = process_text('./data/text_case')
-    print(data)
-    print(label)
+    dataset, tokenizer = generator_batch_dataset('./data/text_case', 8)
+    print(dataset)
+    print(tokenizer)
