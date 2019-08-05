@@ -47,10 +47,10 @@ def process_text(data_path):
 
 def generator_batch_dataset(data_path, batch_size):
     text, label, tokenizer = process_text(data_path)
+    buffer_size = len(text)
     print(np.shape(text))
 
-    dataset = (text, label)
-    dataset = tf.data.Dataset.from_tensor_slices(dataset)
+    dataset = tf.data.Dataset.from_tensor_slices((text, label)).shuffle(buffer_size)
     dataset = dataset.batch(batch_size, drop_remainder = True)
 
     return dataset, tokenizer

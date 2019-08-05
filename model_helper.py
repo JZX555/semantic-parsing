@@ -96,7 +96,8 @@ class TextParsing(tf.keras.Model):
                 activation='relu',
                 name='cnn_filter_{0}'.format(i)
             )
-            pool = tf.keras.layers.MaxPooling2D((self.max_seq_len - self.filters_size[i] + 1, 1))
+            #pool = tf.keras.layers.MaxPooling2D((self.max_seq_len - self.filters_size[i] + 1, 1))
+            pool = tf.keras.layers.MaxPooling2D((input_shape[-1] - self.filters_size[i] + 1, 1))
 
             self.convs.append(conv2D)
             self.pools.append(pool)
@@ -107,20 +108,20 @@ class TextParsing(tf.keras.Model):
         embeded = self.word_embedding(inputs)
         embeded =tf.expand_dims(embeded, -1)
 
-        print(np.shape(embeded))
+        #print(np.shape(embeded))
 
-        pools = []
+        pool_output = []
 
         for i in range(self.filter_kinds):
             feature = self.convs[i](embeded)
-            print(np.shape(feature))
             pooled = self.pools[i](feature)
+            #print(np.shape(pooled))
 
-            pools.append(pooled)
+            pool_output.append(pooled)
         
-        fc = tf.concat(pools, -1)
+        fc = tf.concat(pool_output, -1)
         fc = tf.reshape(fc, [-1, self.filter_nums * self.filter_kinds])
-        print(np.shape(fc))
+        #print(np.shape(fc))
 
         droped = tf.nn.dropout(fc, rate=self.dropout)
 

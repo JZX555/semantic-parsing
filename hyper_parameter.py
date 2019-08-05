@@ -51,7 +51,7 @@ class HyperParam:
              classes_nums=2,
              epoch_num=5,
              epoch=1,
-             lr=2,
+             lr=0.02,
              dropout=0.4):
 
         self.embedding_size = embedding_size
@@ -109,7 +109,7 @@ class HyperParam:
               classes_nums=10,
               epoch_num=5,
               epoch=1,
-              lr=2,
+              lr=0.001,
               dropout=0.4):
 
         self.embedding_size = embedding_size
