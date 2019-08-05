@@ -126,9 +126,13 @@ class TextParsing(tf.keras.Model):
 
         logits = tf.matmul(droped, self.fc_kernel) + self.fc_bias
 
-        projection = tf.nn.softmax(logits)
+        #projection = tf.nn.softmax(logits)
 
-        return projection
+        return logits
+    
+    def get_loss(self, src, tgt):
+        loss = tf.nn.softmax_cross_entropy_with_logits(tgt, src)
+        return loss
 
 if __name__ == "__main__":
     hp = hyper_parameter.HyperParam("test")
@@ -139,7 +143,11 @@ if __name__ == "__main__":
                         hp.dropout, word_embedding)
 
     test_case = tf.constant(np.ones((16, hp.max_seq_len)), dtype=tf.int32)
+    test_label = tf.constant(np.ones((16, 2)), dtype=tf.int32)
     print(test_case)
 
     out = test(test_case)
     print(out)
+
+    loss = test.get_loss(out, test_label)
+    print(loss)
