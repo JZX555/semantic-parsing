@@ -6,7 +6,7 @@ cwd = os.getcwd()
 class HyperParam:
     def __init__(self,
                  mode,
-                 vocab=14000):
+                 vocab=30000):
         """
     The HyperParam of the model, you can use 'test', 'small' or 'large' to 
     specify model size.
@@ -106,7 +106,7 @@ class HyperParam:
               filter_kinds=3,
               filters_size=(3,4,5),
               filter_nums=100,
-              classes_nums=10,
+              classes_nums=2,
               epoch_num=5,
               epoch=1,
               lr=0.001,

@@ -30,7 +30,8 @@ def tokenize_and_padding(text,
 
     return text, tokenizer
 
-def process_text(data_path):
+def process_text(data_path,
+                 tokenizer=None):
     pos_data = open(data_path + '.pos', "r", encoding='UTF-8').readlines()
     pos_data = [clean_str(text.strip()) for text in pos_data]
     pos_label = [[0, 1] for _ in pos_data]
@@ -40,13 +41,13 @@ def process_text(data_path):
     neg_label = [[1, 0] for _ in neg_data]
 
     text = pos_data + neg_data
-    text, tokenizer = tokenize_and_padding(text)
+    text, tokenizer = tokenize_and_padding(text, tokenizer)
     label = np.concatenate([pos_label, neg_label], 0)
 
     return text, label, tokenizer
 
-def generator_batch_dataset(data_path, batch_size):
-    text, label, tokenizer = process_text(data_path)
+def generator_batch_dataset(data_path, batch_size, tokenizer=None):
+    text, label, tokenizer = process_text(data_path, tokenizer)
     buffer_size = len(text)
     print(np.shape(text))
 
