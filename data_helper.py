@@ -46,13 +46,20 @@ def process_text(data_path,
 
     return text, label, tokenizer
 
-def generator_batch_dataset(data_path, batch_size, tokenizer=None):
+def generator_batch_dataset(data_path, batch_size, tokenizer=None, max_seq_len=None):
     text, label, tokenizer = process_text(data_path, tokenizer)
     buffer_size = len(text)
     print(np.shape(text))
 
     dataset = tf.data.Dataset.from_tensor_slices((text, label)).shuffle(buffer_size)
-    dataset = dataset.batch(batch_size, drop_remainder = True)
+    if(max_seq_len == None):
+        dataset = dataset.batch(batch_size, drop_remainder = True)
+    else:
+        dataset = dataset.padded_batch(batch_size, 
+                                       padded_shapes=
+                                           ([max_seq_len],
+                                           [None])
+                                       )
 
     return dataset, tokenizer
 

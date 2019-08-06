@@ -22,7 +22,15 @@ def main(path):
                             hp.dropout, word_embedding)
     print('initial dataset')
     dataset, tokenizer = data_helper.generator_batch_dataset(path, hp.batch_size)
-    test_dataset, tokenizer = data_helper.generator_batch_dataset(TEST_PATH, hp.batch_size, tokenizer=tokenizer)
+    for (batch, (x, y)) in enumerate(dataset):
+        max_seq_len = np.shape(x)[-1]
+        print('max_seq_len={}'.format(max_seq_len))
+        break
+
+    test_dataset, tokenizer = data_helper.generator_batch_dataset(TEST_PATH, 
+                                                                  hp.batch_size, 
+                                                                  tokenizer=tokenizer, 
+                                                                  max_seq_len=max_seq_len)
     print('initial optimizer')
     optimizer = tf.keras.optimizers.Adam(learning_rate=hp.lr)
 
@@ -47,7 +55,7 @@ def main(path):
                                                         batch,
                                                         batch_loss))
         
-        print('train epoch:{} completed, total loss is: {} , use: {}s'.format(epoch, total_loss, time.time() - start))
+        print('train epoch:{} has completed, total loss is: {} , use: {}s'.format(epoch, total_loss, time.time() - start))
 
         for (test_batch, (test_x, test_y)) in enumerate(test_dataset):
             test_logits = model(test_x)

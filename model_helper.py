@@ -143,9 +143,9 @@ class TextParsing(tf.keras.Model):
         ground_truth = tf.argmax(label, axis=-1)
         accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, ground_truth), tf.float32))
 
-        print(predict)
-        print(ground_truth)
-        print(accuracy)
+        # print(predict)
+        # print(ground_truth)
+        # print(accuracy)
 
         return accuracy
 
