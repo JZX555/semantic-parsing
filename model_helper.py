@@ -131,9 +131,23 @@ class TextParsing(tf.keras.Model):
 
         return logits
     
+    def get_predict_with_logits(self, logits):
+        return tf.argmax(logits, axis=-1)
+
     def get_loss(self, src, tgt):
         loss = tf.nn.softmax_cross_entropy_with_logits(tgt, src)
         return loss
+
+    def get_accuracy(self, logits, label):
+        predict = self.get_predict_with_logits(logits)
+        ground_truth = tf.argmax(label, axis=-1)
+        accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, ground_truth), tf.float32))
+
+        # print(predict)
+        # print(ground_truth)
+        # print(accuracy)
+
+        return accuracy
 
 if __name__ == "__main__":
     hp = hyper_parameter.HyperParam("test")
