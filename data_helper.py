@@ -22,7 +22,7 @@ def clean_str(string):
 def tokenize_and_padding(text, 
                          tokenizer=None):
     if tokenizer == None:
-        tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
+        tokenizer = tf.keras.preprocessing.text.Tokenizer(filters=' ')
 
     tokenizer.fit_on_texts(text)
     text = tokenizer.texts_to_sequences(text)
@@ -63,7 +63,19 @@ def generator_batch_dataset(data_path, batch_size, tokenizer=None, max_seq_len=N
 
     return dataset, tokenizer
 
+def get_vocab_from_tokenizer(tokenizer, vocab_size):
+    dictory = tokenizer.word_index
+    with open('vocab.txt',"w") as vocab:
+        for (word, index) in dictory.items():
+            vocab.write(word + '\n')
+        
+        print('generator vocab success')
+        
+
+
+
 if __name__ == "__main__":
-    dataset, tokenizer = generator_batch_dataset('./data/text_case', 8)
+    dataset, tokenizer = generator_batch_dataset('./data/rt-polarity', 8)
     print(dataset)
-    print(tokenizer)
+    print(tokenizer.texts_to_sequences('the text is ready'))
+    # get_vocab_from_tokenizer(tokenizer, "")
