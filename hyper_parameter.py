@@ -52,7 +52,8 @@ class HyperParam:
              epoch_num=5,
              epoch=1,
              lr=0.02,
-             dropout=0.4):
+             dropout=0.4,
+             regular_constrains=3):
 
         self.embedding_size = embedding_size
         self.batch_size = batch_size
@@ -67,6 +68,7 @@ class HyperParam:
         self.epoch_num = epoch_num
         self.dropout = dropout
         self.lr = lr
+        self.regular_constrains = regular_constrains
 
     def small(self,
              embedding_size=16,
@@ -78,10 +80,11 @@ class HyperParam:
              filters_size=(3,4,5),
              filter_nums=25,
              classes_nums=5,
-             epoch_num=5,
+             epoch_num=10,
              epoch=1,
              lr=2,
-             dropout=0.4):
+             dropout=0.4,
+             regular_constrains=3):
 
         self.embedding_size = embedding_size
         self.batch_size = batch_size
@@ -96,6 +99,7 @@ class HyperParam:
         self.epoch_num = epoch_num
         self.dropout = dropout
         self.lr = lr
+        self.regular_constrains = regular_constrains        
 
     def large(self,
               embedding_size=100,
@@ -107,10 +111,11 @@ class HyperParam:
               filters_size=(3,4,5),
               filter_nums=100,
               classes_nums=2,
-              epoch_num=5,
+              epoch_num=10,
               epoch=1,
               lr=0.001,
-              dropout=0.4):
+              dropout=0.4,
+              regular_constrains=0.5):
 
         self.embedding_size = embedding_size
         self.batch_size = batch_size
@@ -125,3 +130,4 @@ class HyperParam:
         self.epoch_num = epoch_num
         self.dropout = dropout
         self.lr = lr
+        self.regular_constrains = regular_constrains

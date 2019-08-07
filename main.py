@@ -19,7 +19,7 @@ def main(path):
     print('initial train model')
     model = model_helper.TextParsing(hp.embedding_size, hp.max_seq_len, hp.filter_kinds,
                             hp.filters_size, hp.filter_nums, hp.classes_nums,
-                            hp.dropout, word_embedding)
+                            hp.dropout, hp.regular_constrains, word_embedding)
     print('initial dataset')
     dataset, tokenizer = data_helper.generator_batch_dataset(path, hp.batch_size)
     for (batch, (x, y)) in enumerate(dataset):
@@ -31,9 +31,12 @@ def main(path):
                                                                   hp.batch_size, 
                                                                   tokenizer=tokenizer, 
                                                                   max_seq_len=max_seq_len)
+    # print(tokenizer.to_json())
+
     print('initial optimizer')
     optimizer = tf.keras.optimizers.Adam(learning_rate=hp.lr)
 
+    print('begin training:')
     for epoch in range(hp.epoch_num):
         start = time.time()
         total_loss = 0
@@ -42,12 +45,11 @@ def main(path):
         for (batch, (x, y)) in enumerate(dataset):   
             with tf.GradientTape() as tape:
                 logits = model(x)
-                loss = model.get_loss(logits, y)
+                batch_loss = model.get_loss(logits, y, regular=False)
 
-            batch_loss = tf.reduce_mean(loss)
             total_loss += batch_loss       
             variables = model.variables
-            gradients = tape.gradient(loss, variables)        
+            gradients = tape.gradient(batch_loss, variables)        
             optimizer.apply_gradients(zip(gradients, variables)) 
 
             if batch % 100 == 0:

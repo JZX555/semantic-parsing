@@ -6,7 +6,7 @@ import numpy as np
 import hyper_parameter
 
 class WordEmbedding(tf.keras.layers.Layer):
-    def __init__(self, vocab_size, embedding_size, name="embedding"):
+    def __init__(self, vocab_size, embedding_size, pre_training_path=None, name="embedding"):
         """
     Specify characteristic parameters of embedding layer.
     Args:
@@ -36,6 +36,9 @@ class WordEmbedding(tf.keras.layers.Layer):
         embeddings *= self.embedding_size**0.5
 
         return embeddings
+    
+    def pre_training(self, path):
+
 
 class TextParsing(tf.keras.Model):
     def __init__(self,
@@ -46,6 +49,7 @@ class TextParsing(tf.keras.Model):
              filter_nums,
              classes_nums,
              dropout,
+             regular_constrains,
              word_embedding):
         """
     The model for semantic parsing.
@@ -67,6 +71,7 @@ class TextParsing(tf.keras.Model):
 
         self.classes_nums = classes_nums
         self.dropout = dropout
+        self.regular_constrains = regular_constrains
         self.word_embedding = word_embedding
 
         self.kernel_initializer = "ones"
@@ -92,6 +97,7 @@ class TextParsing(tf.keras.Model):
             conv2D = tf.keras.layers.Conv2D(
                 self.filter_nums,
                 (self.filters_size[i], self.embedding_size),
+                kernel_regularizer=tf.keras.regularizers.l2(self.regular_constrains),
                 padding='VALID',
                 activation='relu',
                 name='cnn_filter_{0}'.format(i)
@@ -134,8 +140,17 @@ class TextParsing(tf.keras.Model):
     def get_predict_with_logits(self, logits):
         return tf.argmax(logits, axis=-1)
 
-    def get_loss(self, src, tgt):
-        loss = tf.nn.softmax_cross_entropy_with_logits(tgt, src)
+    def get_loss(self, src, tgt, regular=True):
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tgt, src))
+
+        if regular:
+            loss += tf.nn.l2_loss(self.fc_kernel) * self.regular_constrains
+            loss += tf.nn.l2_loss(self.fc_bias) * self.regular_constrains
+
+            for i in range(self.filter_kinds):
+                loss += tf.nn.l2_loss(self.convs[i].weights[0]) * self.regular_constrains
+                # loss += tf.nn.l2_loss(self.convs[i].weights[1])
+
         return loss
 
     def get_accuracy(self, logits, label):
@@ -155,7 +170,7 @@ if __name__ == "__main__":
     print('initial test model')
     test = TextParsing(hp.embedding_size, hp.max_seq_len, hp.filter_kinds,
                         hp.filters_size, hp.filter_nums, hp.classes_nums,
-                        hp.dropout, word_embedding)
+                        hp.dropout, hp.regular_constrains, word_embedding)
 
     test_case = tf.constant(np.ones((16, hp.max_seq_len)), dtype=tf.int32)
     test_label = tf.constant(np.ones((16, 2)), dtype=tf.int32)
