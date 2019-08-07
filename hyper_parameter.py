@@ -6,7 +6,7 @@ cwd = os.getcwd()
 class HyperParam:
     def __init__(self,
                  mode,
-                 vocab=30000):
+                 vocab=18900):
         """
     The HyperParam of the model, you can use 'test', 'small' or 'large' to 
     specify model size.
@@ -102,7 +102,7 @@ class HyperParam:
         self.regular_constrains = regular_constrains        
 
     def large(self,
-              embedding_size=100,
+              embedding_size=300,
               batch_size=32,
               heads_num=3,
               max_seq_len=100,

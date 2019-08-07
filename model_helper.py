@@ -6,7 +6,7 @@ import numpy as np
 import hyper_parameter
 
 class WordEmbedding(tf.keras.layers.Layer):
-    def __init__(self, vocab_size, embedding_size, pre_training_path=None, name="embedding"):
+    def __init__(self, vocab_size, embedding_size, tokenizer=None, pre_training_path=None, name="embedding"):
         """
     Specify characteristic parameters of embedding layer.
     Args:
@@ -16,6 +16,9 @@ class WordEmbedding(tf.keras.layers.Layer):
         super(WordEmbedding, self).__init__(name='word_embedding')
         self.vocab_size = vocab_size
         self.embedding_size = embedding_size
+
+        self.tokenizer = tokenizer
+        self.pre_training_path = pre_training_path
         #self.pad_id = pad_id
 
     def build(self, input_shape):
@@ -25,6 +28,10 @@ class WordEmbedding(tf.keras.layers.Layer):
             name="shared_weights",
             initializer=tf.random_normal_initializer(
                 mean=0., stddev=self.embedding_size**-0.5))
+
+        if(self.pre_training_path != None and self.tokenizer != None):
+            self.pre_training_load(self.pre_training_path)
+
         super(WordEmbedding, self).build(input_shape)
 
     def call(self, inputs):
@@ -37,8 +44,40 @@ class WordEmbedding(tf.keras.layers.Layer):
 
         return embeddings
     
-    def pre_training(self, path):
+    def pre_training_load(self, path):
+        """
+        Loads pre-training word vector from file
+        """
+        i=0
+        vocab = self.tokenizer.word_index
+        word_vecs = {}
+        pury_word_vec = []
 
+        with open(path, "rb") as pre_file:
+            header = pre_file.readline()
+            print('header: {}'.format(header))
+
+            vocab_size, layer1_size = map(int, header.split())
+            print('vocabsize: {}, layer1_size: {}'.format(vocab_size,layer1_size))
+
+            binary_len = np.dtype('float32').itemsize * layer1_size
+            for line in range(vocab_size):
+                word = []
+                while True:
+                    ch = pre_file.read(1)
+                    if(ch == b'\x20'):
+                        word = ''.join('%s' %tmp.decode('utf8', 'ignore') for tmp in word)
+                        break
+                    if(ch != '\n'):
+                        word.append(ch)
+
+                if word in vocab:
+                    pre_vector = np.fromstring(pre_file.read(binary_len), dtype='float32')
+                    index = vocab[word]
+                    self.shared_weights[index,:].assign(pre_vector)
+
+                else:
+                    pre_file.read(binary_len)
 
 class TextParsing(tf.keras.Model):
     def __init__(self,

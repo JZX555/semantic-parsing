@@ -12,14 +12,10 @@ print(np.__version__)
 
 DATA_PATH = './data/rt-polarity'
 TEST_PATH = './data/text_case'
+PRE_TRAINNING = 'D:/dataset/GoogleNews-vectors-negative300.bin/GoogleNews-vectors-negative300.bin'
 
 def main(path):
     hp = hyper_parameter.HyperParam("large")
-    word_embedding = model_helper.WordEmbedding(hp.vocabulary_size, hp.embedding_size)
-    print('initial train model')
-    model = model_helper.TextParsing(hp.embedding_size, hp.max_seq_len, hp.filter_kinds,
-                            hp.filters_size, hp.filter_nums, hp.classes_nums,
-                            hp.dropout, hp.regular_constrains, word_embedding)
     print('initial dataset')
     dataset, tokenizer = data_helper.generator_batch_dataset(path, hp.batch_size)
     for (batch, (x, y)) in enumerate(dataset):
@@ -32,6 +28,13 @@ def main(path):
                                                                   tokenizer=tokenizer, 
                                                                   max_seq_len=max_seq_len)
     # print(tokenizer.to_json())
+
+
+    print('initial train model')
+    word_embedding = model_helper.WordEmbedding(hp.vocabulary_size, hp.embedding_size, tokenizer, PRE_TRAINNING)
+    model = model_helper.TextParsing(hp.embedding_size, hp.max_seq_len, hp.filter_kinds,
+                            hp.filters_size, hp.filter_nums, hp.classes_nums,
+                            hp.dropout, hp.regular_constrains, word_embedding)
 
     print('initial optimizer')
     optimizer = tf.keras.optimizers.Adam(learning_rate=hp.lr)

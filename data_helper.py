@@ -77,5 +77,5 @@ def get_vocab_from_tokenizer(tokenizer, vocab_size):
 if __name__ == "__main__":
     dataset, tokenizer = generator_batch_dataset('./data/rt-polarity', 8)
     print(dataset)
-    print(tokenizer.texts_to_sequences('the text is ready'))
+    print(tokenizer.sequences_to_texts([[10]]))
     # get_vocab_from_tokenizer(tokenizer, "")
