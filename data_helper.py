@@ -31,6 +31,7 @@ def tokenize_and_padding(text,
     return text, tokenizer
 
 def process_text(data_path,
+                 max_seq_len,
                  tokenizer=None):
     pos_data = open(data_path + '.pos', "r", encoding='UTF-8').readlines()
     pos_data = [clean_str(text.strip()) for text in pos_data]
@@ -42,12 +43,13 @@ def process_text(data_path,
 
     text = pos_data + neg_data
     text, tokenizer = tokenize_and_padding(text, tokenizer)
+    text = [tmp[:max_seq_len] for tmp in text]
     label = np.concatenate([pos_label, neg_label], 0)
 
     return text, label, tokenizer
 
-def generator_batch_dataset(data_path, batch_size, tokenizer=None, max_seq_len=None):
-    text, label, tokenizer = process_text(data_path, tokenizer)
+def generator_batch_dataset(data_path, batch_size, max_seq_len, tokenizer=None):
+    text, label, tokenizer = process_text(data_path, max_seq_len, tokenizer)
     buffer_size = len(text)
     print(np.shape(text))
 

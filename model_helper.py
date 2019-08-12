@@ -6,7 +6,7 @@ import numpy as np
 import hyper_parameter
 
 class WordEmbedding(tf.keras.layers.Layer):
-    def __init__(self, vocab_size, embedding_size, tokenizer=None, pre_training_path=None, name="embedding"):
+    def __init__(self, vocab_size, embedding_size, tokenizer=None, pre_training_path=None, pre_training=False,name="embedding"):
         """
     Specify characteristic parameters of embedding layer.
     Args:
@@ -19,6 +19,7 @@ class WordEmbedding(tf.keras.layers.Layer):
 
         self.tokenizer = tokenizer
         self.pre_training_path = pre_training_path
+        self.pre_training = pre_training
         #self.pad_id = pad_id
 
     def build(self, input_shape):
@@ -29,7 +30,7 @@ class WordEmbedding(tf.keras.layers.Layer):
             initializer=tf.random_normal_initializer(
                 mean=0., stddev=self.embedding_size**-0.5))
 
-        if(self.pre_training_path != None and self.tokenizer != None):
+        if(self.pre_training_path != None and self.tokenizer != None and self.pre_training):
             self.pre_training_load(self.pre_training_path)
 
         super(WordEmbedding, self).build(input_shape)
@@ -54,14 +55,15 @@ class WordEmbedding(tf.keras.layers.Layer):
         pury_word_vec = []
 
         with open(path, "rb") as pre_file:
+            print('begin reload pre-training vector')
             header = pre_file.readline()
-            print('header: {}'.format(header))
-
             vocab_size, layer1_size = map(int, header.split())
             print('vocabsize: {}, layer1_size: {}'.format(vocab_size,layer1_size))
 
             binary_len = np.dtype('float32').itemsize * layer1_size
             for line in range(vocab_size):
+                if(line % (vocab_size / 10) == 0 and line != 0):
+                    print('the pre-training vector has reloaded {}%'.format(line / (vocab_size / 100)))
                 word = []
                 while True:
                     ch = pre_file.read(1)
@@ -78,6 +80,8 @@ class WordEmbedding(tf.keras.layers.Layer):
 
                 else:
                     pre_file.read(binary_len)
+        
+        print('the pre-training vector has reloaded successfully')
 
 class TextParsing(tf.keras.Model):
     def __init__(self,
@@ -118,8 +122,15 @@ class TextParsing(tf.keras.Model):
 
     def build(self, input_shape):
         self.convs = []
+        # cself.conv_bias = []
         self.pools = []
-        
+
+        self.conv_bias = self.add_variable(
+            shape=[self.filter_nums],
+            name="conv_bias",
+            dtype=tf.float32,
+            initializer=self.bias_initializer)        
+
         self.fc_kernel = self.add_variable(
             shape=[self.filter_nums * self.filter_kinds, self.classes_nums],
             name="fc_kernel",
@@ -132,7 +143,7 @@ class TextParsing(tf.keras.Model):
             dtype=tf.float32,
             initializer=self.bias_initializer)
 
-        for i in range(self.filter_kinds):
+        for i in range(self.filter_kinds):  
             conv2D = tf.keras.layers.Conv2D(
                 self.filter_nums,
                 (self.filters_size[i], self.embedding_size),
@@ -141,10 +152,16 @@ class TextParsing(tf.keras.Model):
                 activation='relu',
                 name='cnn_filter_{0}'.format(i)
             )
+            # bias = self.add_variable(
+            #     shape=[self.filter_nums],
+            #     name="conv_bias",
+            #     dtype=tf.float32,
+            #     initializer=self.bias_initializer)
             #pool = tf.keras.layers.MaxPooling2D((self.max_seq_len - self.filters_size[i] + 1, 1))
             pool = tf.keras.layers.MaxPooling2D((input_shape[-1] - self.filters_size[i] + 1, 1))
 
             self.convs.append(conv2D)
+            # self.conv_bias.append(bias)
             self.pools.append(pool)
 
         #super(TextParsing, self).build(input_shape)
@@ -153,20 +170,22 @@ class TextParsing(tf.keras.Model):
         embeded = self.word_embedding(inputs)
         embeded =tf.expand_dims(embeded, -1)
 
-        #print(np.shape(embeded))
+        # print(np.shape(embeded))
 
         pool_output = []
 
         for i in range(self.filter_kinds):
             feature = self.convs[i](embeded)
-            pooled = self.pools[i](feature)
-            #print(np.shape(pooled))
+            relu = tf.nn.relu(tf.nn.bias_add(feature, self.conv_bias))
+            pooled = self.pools[i](relu)
+            # print(np.shape(pooled))
 
             pool_output.append(pooled)
         
         fc = tf.concat(pool_output, -1)
+        # print(np.shape(fc))
         fc = tf.reshape(fc, [-1, self.filter_nums * self.filter_kinds])
-        #print(np.shape(fc))
+        # print(np.shape(fc))
 
         droped = tf.nn.dropout(fc, rate=self.dropout)
 

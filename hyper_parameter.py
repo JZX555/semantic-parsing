@@ -103,19 +103,19 @@ class HyperParam:
 
     def large(self,
               embedding_size=300,
-              batch_size=32,
+              batch_size=50,
               heads_num=3,
-              max_seq_len=100,
-              input_chanels=2,
+              max_seq_len=20,
+              input_chanels=1,
               filter_kinds=3,
               filters_size=(3,4,5),
-              filter_nums=100,
+              filter_nums=256,
               classes_nums=2,
               epoch_num=10,
               epoch=1,
               lr=0.001,
-              dropout=0.4,
-              regular_constrains=0.5):
+              dropout=0.5,
+              regular_constrains=0.3):
 
         self.embedding_size = embedding_size
         self.batch_size = batch_size
